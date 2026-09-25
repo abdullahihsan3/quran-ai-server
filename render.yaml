@@ -1,0 +1,37 @@
+# Render Blueprint for the Quran AI server (free Python web service). scripts/deploy_render.py
+# creates the same service through the Render API; this file documents it and allows a manual
+# "New > Blueprint" deploy. Secrets (sync: false) are entered in the Render dashboard.
+services:
+  - type: web
+    name: quran-ai
+    runtime: python
+    plan: free
+    region: frankfurt
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT --proxy-headers
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: QURAN_AI_LLM_BACKEND
+        value: openai_compatible
+      - key: QURAN_AI_LLM_PROVIDER
+        value: groq
+      - key: QURAN_AI_LLM_BASE_URL
+        value: https://api.groq.com/openai/v1
+      - key: QURAN_AI_MODEL_ID
+        value: qwen/qwen3.8-27b
+      - key: QURAN_AI_DATA_REPO
+        sync: false          # <hf-user>/quran-ai-data (private dataset)
+      - key: HF_TOKEN
+        sync: false
+      - key: QURAN_AI_LLM_API_KEY
+        sync: false          # Groq API key
+      - key: QURAN_AI_CLIENT_KEY
+        sync: false          # must match QuranAIConfiguration.clientKey in the app
+      - key: QURAN_AI_MAX_NEW_TOKENS
+        value: "350"
+      - key: QURAN_AI_TRUST_FORWARDED_FOR
+        value: "true"
+      - key: QURAN_AI_RATE_LIMIT_PER_MINUTE
+        value: "10"
